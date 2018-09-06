@@ -3,8 +3,6 @@ import datetime
 import hashlib
 import json
 
-from flask import Flask, jsonify
-
 # Part 1 - Building a Blockchain
 
 
@@ -71,6 +69,3 @@ class Blockchain:
         proof = cur["proof"]
         hash_operation = self.calculate_hash_operation(proof, previous_proof)
         return hash_operation[:4] != "0000"
-
-
-# Part 2 - Mining our Blockchain
