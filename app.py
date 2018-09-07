@@ -2,7 +2,7 @@
 
 from flask import Flask, jsonify
 
-from .blockchain import Blockchain
+from blockchain import Blockchain
 
 # Part 2 - Mining our Blockchain
 
@@ -21,7 +21,7 @@ def mine_block():
 
     new_block = blockchain.create_block(proof, previous_hash)
 
-    response = {"message": "Congratulations, new proof: " + new_block["proof"]}
+    response = {"message": "Congratulations, new proof: " + str(new_block["proof"])}
     response.update(new_block)
 
     return jsonify(response), 200
@@ -31,3 +31,6 @@ def mine_block():
 def get_chain():
     response = {"chain": blockchain.chain, "length": len(blockchain.chain)}
     return jsonify(response), 200
+
+
+app.run(host="0.0.0.0", port=5000)
