@@ -1,12 +1,12 @@
-# Module 1 - Create a Blockchain
+from uuid import uuid4
 
 from flask import Flask, jsonify
 
 from blockchain import Blockchain
 
-# Part 2 - Mining our Blockchain
-
 app = Flask(__name__)
+
+node_address = str(uuid4()).replace("-", "")
 
 blockchain = Blockchain()
 
@@ -19,6 +19,7 @@ def mine_block():
 
     proof = blockchain.proof_of_work(previous_proof)
 
+    blockchain.add_transaction(node_address, "Latrova", 1)
     new_block = blockchain.create_block(proof, previous_hash)
 
     response = {"message": "Congratulations, new proof: " + str(new_block["proof"])}
@@ -29,7 +30,7 @@ def mine_block():
 
 @app.route("/get_chain", methods=["GET"])
 def get_chain():
-    response = {"chain": blockchain.chain, "length": len(blockchain.chain)}
+    response = {"chain": blockchain.chain, "length": blockchain.length}
     return jsonify(response), 200
 
 
