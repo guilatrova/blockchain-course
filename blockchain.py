@@ -2,6 +2,10 @@
 import datetime
 import hashlib
 import json
+from urllib.parse import urlparse
+from uuid import uuid4
+
+import requests
 
 # Part 1 - Building a Blockchain
 
@@ -9,7 +13,13 @@ import json
 class Blockchain:
     def __init__(self):
         self.chain = []
+        self.transactions = []
+        self.nodes = set()
         self.create_block(proof=1, previous_hash="0")
+
+    @property
+    def length(self):
+        return len(self.chain)
 
     def create_block(self, proof, previous_hash):
         block = {
@@ -17,7 +27,9 @@ class Blockchain:
             "timestamp": str(datetime.datetime.now()),
             "proof": proof,  # Nonce
             "previous_hash": previous_hash,
+            "transactions": self.transactions,
         }
+        self.transactions = []
         self.chain.append(block)
         return block
 
@@ -60,6 +72,37 @@ class Blockchain:
             previous_block = block
 
         return True
+
+    def add_transaction(self, sender, receiver, amount):
+        self.transactions.append(
+            {"sender": sender, "receiver": receiver, "amount": amount}
+        )
+
+        previous_block = self.get_previous_block()
+        return previous_block["index"] + 1
+
+    def add_node(self, address):
+        url = urlparse(address)
+        self.nodes.add(url.netloc)
+
+    def replace_chain(self):
+        network = self.nodes
+        longest_chain = None
+        max_length = self.length
+
+        for node in network:
+            response = requests.get(f"http://{node}/get_chain")
+
+            if response.ok:
+                data = response.json()
+                if data["length"] > max_length and self.is_chain_valid(data["chain"]):
+                    max_length = data["length"]
+                    longest_chain = data["chain"]
+
+        if longest_chain:
+            self.chain = longest_chain
+            return True
+        return False
 
     def _validate_block_hash(self, prev, cur):
         return cur["previous_hash"] != self.hash(prev)
