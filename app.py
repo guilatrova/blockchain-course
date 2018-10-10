@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 
 from blockchain import Blockchain
 
@@ -41,7 +41,7 @@ def is_valid():
 
 
 @app.route("/add_transaction", methods=["POST"])
-def add_transaction(request):
+def add_transaction():
     json = request.get_json()
     transaction_keys = ["sender", "receiver", "amount"]
     if not all(key in json for key in transaction_keys):
@@ -50,6 +50,30 @@ def add_transaction(request):
     index = blockchain.add_transaction(**json)
     response = {"message": f"This transaction will be added to Block {index}"}
     return jsonify(response), 201
+
+
+@app.route("/connect_node", methods=["POST"])
+def connect_node():
+    json = request.json()
+    nodes = json.get("nodes", False)
+
+    if nodes:
+        for node in nodes:
+            blockchain.add_node(node)
+
+        response = {
+            "message": f"All nodes are now connected. Blockchain contains {len(nodes)} nodes",
+            "total_nodes": list(blockchain.nodes),
+        }
+        return jsonify(response), 201
+
+    return "No node", 400
+
+
+@app.route("/chain/replace", methods=["GET"])
+def replace_chain():
+    response = {"replaced": blockchain.replace_chain(), "chain": blockchain.chain}
+    return jsonify(response), 200
 
 
 app.run(host="0.0.0.0", port=5000)
