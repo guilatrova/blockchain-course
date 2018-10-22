@@ -104,10 +104,10 @@ class Blockchain:
         return False
 
     def _validate_block_hash(self, prev, cur):
-        return cur["previous_hash"] != self.hash(prev)
+        return cur["previous_hash"] == self.hash(prev)
 
     def _validate_block_proof(self, prev, cur):
         previous_proof = prev["proof"]
         proof = cur["proof"]
         hash_operation = self.calculate_hash_operation(proof, previous_proof)
-        return hash_operation[:4] != "0000"
+        return hash_operation[:4] == "0000"

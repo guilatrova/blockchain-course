@@ -1,3 +1,4 @@
+import sys
 from uuid import uuid4
 
 from flask import Flask, jsonify, request
@@ -9,6 +10,9 @@ app = Flask(__name__)
 node_address = str(uuid4()).replace("-", "")
 
 blockchain = Blockchain()
+port = sys.argv[1] if len(sys.argv) > 1 else 5000
+sender_map = {5000: "Goku", 5001: "Krillin"}
+sender = sender_map.get(port, "Latrova")
 
 
 @app.route("/mine_block", methods=["GET"])
@@ -19,7 +23,7 @@ def mine_block():
 
     proof = blockchain.proof_of_work(previous_proof)
 
-    blockchain.add_transaction(node_address, "Latrova", 1)
+    blockchain.add_transaction(node_address, sender, 1)
     new_block = blockchain.create_block(proof, previous_hash)
 
     response = {"message": "Congratulations, new proof: " + str(new_block["proof"])}
@@ -54,7 +58,7 @@ def add_transaction():
 
 @app.route("/connect_node", methods=["POST"])
 def connect_node():
-    json = request.json()
+    json = request.get_json()
     nodes = json.get("nodes", False)
 
     if nodes:
@@ -76,4 +80,4 @@ def replace_chain():
     return jsonify(response), 200
 
 
-app.run(host="0.0.0.0", port=5000)
+app.run(host="0.0.0.0", port=port)
