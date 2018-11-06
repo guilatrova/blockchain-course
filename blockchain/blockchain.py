@@ -1,12 +1,9 @@
-# Module 1 - Create a Blockchain
 import datetime
 import hashlib
 import json
 from urllib.parse import urlparse
 
 import requests
-
-# Part 1 - Building a Blockchain
 
 
 class Blockchain:
